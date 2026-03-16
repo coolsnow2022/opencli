@@ -60,11 +60,6 @@ export async function executePipeline(
         if (debug) process.stderr.write(`  ${chalk.yellow('⚠')}  Unknown step: ${op}\n`);
       }
 
-      // Detect error objects returned by steps (e.g. tap store not found)
-      if (data && typeof data === 'object' && !Array.isArray(data) && data.error) {
-        process.stderr.write(`  ${chalk.yellow('⚠')}  ${chalk.yellow(op)}: ${data.error}\n`);
-        if (data.hint) process.stderr.write(`  ${chalk.dim('💡')} ${chalk.dim(data.hint)}\n`);
-      }
       if (debug) debugStepResult(op, data);
     }
   }

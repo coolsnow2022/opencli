@@ -214,7 +214,7 @@ export class Page implements IPage {
     return this.call('tools/call', { name: 'browser_console_messages', arguments: { level } });
   }
 
-  async scroll(direction: string = 'down', amount: number = 500): Promise<void> {
+  async scroll(direction: string = 'down', _amount: number = 500): Promise<void> {
     await this.call('tools/call', { name: 'browser_press_key', arguments: { key: direction === 'down' ? 'PageDown' : 'PageUp' } });
   }
 

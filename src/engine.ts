@@ -185,7 +185,7 @@ export async function executeCommand(
     const { getRegistry, fullName } = await import('./registry.js');
     const updated = getRegistry().get(fullName(cmd));
     if (updated && updated.func) {
-      return updated.func(page, kwargs, debug);
+      return updated.func(page!, kwargs, debug);
     }
     if (updated && updated.pipeline) {
       return executePipeline(page, updated.pipeline, { args: kwargs, debug });
@@ -193,7 +193,7 @@ export async function executeCommand(
   }
 
   if (cmd.func) {
-    return cmd.func(page, kwargs, debug);
+    return cmd.func(page!, kwargs, debug);
   }
   if (cmd.pipeline) {
     return executePipeline(page, cmd.pipeline, { args: kwargs, debug });

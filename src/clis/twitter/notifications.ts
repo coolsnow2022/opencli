@@ -30,7 +30,7 @@ cli({
     let results: any[] = [];
     for (const req of requests) {
       try {
-        let instructions = [];
+        let instructions: any[] = [];
         if (req.data?.data?.viewer?.timeline_response?.timeline?.instructions) {
              instructions = req.data.data.viewer.timeline_response.timeline.instructions;
         } else if (req.data?.data?.viewer_v2?.user_results?.result?.notification_timeline?.timeline?.instructions) {

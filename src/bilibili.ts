@@ -84,10 +84,10 @@ export async function apiGet(
 }
 
 export async function fetchJson(page: IPage, url: string): Promise<any> {
-  const escapedUrl = url.replace(/"/g, '\\"');
+  const urlJs = JSON.stringify(url);
   return page.evaluate(`
     async () => {
-      const res = await fetch("${escapedUrl}", { credentials: "include" });
+      const res = await fetch(${urlJs}, { credentials: "include" });
       return await res.json();
     }
   `);
