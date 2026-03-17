@@ -11,6 +11,8 @@ import { stdin as input, stdout as output } from 'node:process';
 import {
   type DoctorReport,
   PLAYWRIGHT_TOKEN_ENV,
+  checkExtensionInstalled,
+  checkTokenConnectivity,
   discoverExtensionToken,
   fileExists,
   getDefaultShellRcPath,
@@ -60,11 +62,24 @@ export async function runSetup(opts: { cliVersion?: string; token?: string } = {
   }
 
   if (!token) {
-    console.log(`  ${chalk.yellow('!')} No token found. Please enter it manually.`);
-    console.log(chalk.dim('    (Find it in the Playwright MCP Bridge extension → Status page)'));
+    // Give precise diagnosis of why token scan failed
+    const extInstall = checkExtensionInstalled();
+
+    console.log(`  ${chalk.red('✗')} Browser token scan failed\n`);
+    if (!extInstall.installed) {
+      console.log(chalk.dim('  Cause: Playwright MCP Bridge extension is not installed'));
+      console.log(chalk.dim('  Fix:   Install from https://chromewebstore.google.com/detail/'));
+      console.log(chalk.dim('         playwright-mcp-bridge/mmlmfjhmonkocbjadbfplnigmagldckm'));
+    } else {
+      console.log(chalk.dim(`  Cause: Extension is installed (${extInstall.browsers.join(', ')}) but token not found in LevelDB`));
+      console.log(chalk.dim('  Fix:   1) Open the extension popup and verify the token is generated'));
+      console.log(chalk.dim('         2) Close Chrome completely, then re-run setup'));
+    }
+    console.log();
+    console.log(`  You can enter the token manually, or fix the above and re-run ${chalk.bold('opencli setup')}.`);
     console.log();
     const rl = createInterface({ input, output });
-    const answer = await rl.question('  Token: ');
+    const answer = await rl.question('  Token (press Enter to abort): ');
     rl.close();
     token = answer.trim();
     if (!token) {
@@ -159,6 +174,21 @@ export async function runSetup(opts: { cliVersion?: string; token?: string } = {
     }
   } else {
     console.log(chalk.yellow('  No files were changed.'));
+  }
+  console.log();
+
+  // Step 7: Auto-verify browser connectivity
+  console.log(chalk.dim('  Verifying browser connectivity...'));
+  try {
+    const result = await checkTokenConnectivity();
+    if (result.ok) {
+      console.log(`  ${chalk.green('✓')} Browser connected in ${(result.durationMs / 1000).toFixed(1)}s`);
+    } else {
+      console.log(`  ${chalk.yellow('!')} Browser connectivity test failed: ${result.error ?? 'unknown'}`);
+      console.log(chalk.dim('    Make sure Chrome is running with the extension enabled.'));
+    }
+  } catch {
+    console.log(`  ${chalk.yellow('!')} Could not verify connectivity (Chrome may not be running)`);
   }
   console.log();
 }
